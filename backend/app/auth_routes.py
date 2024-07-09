@@ -1,7 +1,7 @@
-from flask import request
+from flask import request, jsonify
 from flask_restful import Resource
 from werkzeug.security import generate_password_hash, check_password_hash
-from flask_jwt_extended import create_access_token
+from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity
 from app.models import get_user_by_username, add_user
 
 
@@ -13,6 +13,9 @@ class Register(Resource):
 
         if get_user_by_username(username):
             return {"message": "User already exists"}, 400
+
+        if not username or not password:
+            return {"message": "Username and password are required"}, 400
 
         hashed_password = generate_password_hash(password)
         user_id = add_user({"username": username, "password": hashed_password})

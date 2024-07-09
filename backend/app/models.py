@@ -1,5 +1,8 @@
 from app import mongo
 from bson.objectid import ObjectId
+from flask_wtf import FlaskForm
+from wtforms import StringField, TextAreaField, SelectField
+from wtforms.validators import DataRequired, Length
 
 
 def get_tasks_collection():
@@ -17,26 +20,23 @@ def get_task(task_id, user_id):
 
 def add_task(task):
     tasks = get_tasks_collection()
-    data = tasks.insert_one(task).inserted_id
-    return data
+    return tasks.insert_one(task).inserted_id
 
 
 def update_task(task_id, task, user_id):
     tasks = get_tasks_collection()
-    # Remove _id field if it exists in the task dictionary
-    task.pop('_id', None)
     return tasks.update_one({"_id": ObjectId(task_id), "user_id": user_id}, {"$set": task})
 
 
 def delete_task(task_id, user_id):
     tasks = get_tasks_collection()
+    print(task_id, user_id, "deleted")
     return tasks.delete_one({"_id": ObjectId(task_id), "user_id": user_id})
 
 
 def get_all_tasks(user_id):
     tasks = get_tasks_collection()
-    data = tasks.find({"user_id": user_id})
-    return [task for task in data]
+    return tasks.find({"user_id": user_id})
 
 
 def get_user_by_username(username):
@@ -47,3 +47,13 @@ def get_user_by_username(username):
 def add_user(user):
     users = get_users_collection()
     return users.insert_one(user).inserted_id
+
+
+class TaskForm(FlaskForm):
+    csrf = False
+    title = StringField('Title', validators=[
+                        DataRequired(), Length(min=1, max=100)])
+    description = TextAreaField('Description', validators=[DataRequired(),
+                                Length(min=1, max=500)])
+    status = SelectField('Status', choices=[('To Do', 'To Do'), (
+        'In Progress', 'In Progress'), ('Done', 'Done')], validators=[DataRequired()])

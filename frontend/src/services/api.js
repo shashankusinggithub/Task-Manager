@@ -1,6 +1,10 @@
 import axios from "axios";
 
-const API_URL = process.env.REACT_APP_API_URL || "";
+// const API_URL = "";
+let API_URL = process.env.REACT_APP_API_URL;
+if (process.env.REACT_APP_NODE_ENV === "production") {
+  API_URL = "";
+}
 
 export const register = (username, password) => {
   return axios.post(`${API_URL}/api/auth/register`, { username, password });

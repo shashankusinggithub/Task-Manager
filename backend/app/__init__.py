@@ -5,6 +5,7 @@ from flask_cors import CORS
 from flask_jwt_extended import JWTManager
 from app.config import Config
 
+
 mongo = PyMongo()
 jwt = JWTManager()
 
@@ -12,7 +13,7 @@ jwt = JWTManager()
 def create_app():
     app = Flask(__name__)
     app.config.from_object(Config)
-
+    app.config['WTF_CSRF_ENABLED'] = False
     mongo.init_app(app)
     jwt.init_app(app)
     api = Api(app)

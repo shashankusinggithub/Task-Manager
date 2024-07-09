@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Container, Row, Col } from "react-bootstrap";
+import { Container, Row, Col, Alert } from "react-bootstrap";
 import TaskForm from "../components/TaskForm";
 import TaskList from "../components/TaskList";
 import Filter from "../components/Filter";
@@ -9,70 +9,71 @@ import { useNavigate } from "react-router-dom";
 const HomePage = () => {
   const [tasks, setTasks] = useState([]);
   const [filter, setFilter] = useState("All");
+  const [token, setToken] = useState(localStorage.getItem("token"));
+  const [error, setError] = useState(null);
   const navigate = useNavigate();
 
   useEffect(() => {
-    const token = localStorage.getItem("token");
-    if (token) {
-      fetchTasks(token);
-    } else {
-      navigate("/login");
-    }
-  }, [navigate]);
-
-  const fetchTasks = async (token) => {
-    try {
-      const response = await getTasks(token);
-      if (response.data) {
-        setTasks(response.data);
+    const fetchTasks = async () => {
+      if (token) {
+        try {
+          const response = await getTasks(token);
+          setTasks(response.data);
+        } catch (error) {
+          setError("Failed to fetch tasks.");
+        }
       } else {
-        console.error("Unexpected response data", response.data);
-        setTasks([]);
-      }
-    } catch (error) {
-      console.error("Failed to fetch tasks", error);
-      if (error.response && error.response.status === 401) {
-        localStorage.removeItem("token");
         navigate("/login");
       }
-    }
-  };
+    };
+    fetchTasks();
+  }, [token]);
 
+  function getErrorMessages(errors) {
+    let errorMessages = [];
+    for (let key in errors) {
+      if (errors.hasOwnProperty(key)) {
+        errors[key].forEach((error) => {
+          errorMessages.push(`${key}: ${error}`);
+        });
+      }
+    }
+    return errorMessages.join(" ");
+  }
   const handleCreateTask = async (task) => {
-    const token = localStorage.getItem("token");
     if (token) {
       try {
         const response = await createTask(task, token);
         setTasks([...tasks, { ...task, _id: response.data }]);
+        setError(null);
       } catch (error) {
-        console.error("Failed to create task", error);
+        setError(getErrorMessages(error.response.data.errors));
       }
     }
   };
 
   const handleUpdateTask = async (taskId, updatedTask) => {
-    const token = localStorage.getItem("token");
     if (token) {
       try {
-        const { _id, ...taskData } = updatedTask;
-        await updateTask(taskId, taskData, token);
+        await updateTask(taskId, updatedTask, token);
         setTasks(
           tasks.map((task) => (task._id === taskId ? updatedTask : task))
         );
+        setError(null);
       } catch (error) {
-        console.error("Failed to update task", error);
+        setError(getErrorMessages(error.response.data.errors));
       }
     }
   };
 
   const handleDeleteTask = async (taskId) => {
-    const token = localStorage.getItem("token");
     if (token) {
       try {
         await deleteTask(taskId, token);
         setTasks(tasks.filter((task) => task._id !== taskId));
+        setError(null);
       } catch (error) {
-        console.error("Failed to delete task", error);
+        setError("Failed to delete task.");
       }
     }
   };
@@ -83,12 +84,17 @@ const HomePage = () => {
 
   return (
     <Container>
-      <Row className="mb-4">
+      {error && <Alert variant="danger">{error}</Alert>}
+      <Row>
         <Col>
           <TaskForm handleSubmit={handleCreateTask} />
         </Col>
       </Row>
-      <Filter filter={filter} setFilter={setFilter} />
+      <Row>
+        <Col>
+          <Filter filter={filter} setFilter={setFilter} />
+        </Col>
+      </Row>
       <Row>
         <Col>
           <TaskList

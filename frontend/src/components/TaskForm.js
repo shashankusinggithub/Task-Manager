@@ -34,6 +34,7 @@ const TaskForm = ({ handleSubmit }) => {
           placeholder="Enter task description"
           value={description}
           onChange={(e) => setDescription(e.target.value)}
+          required
         />
       </Form.Group>
 

@@ -11,18 +11,18 @@ class AuthTestCase(unittest.TestCase):
         self.db.delete_many({})  # Clear the database before each test
 
     def test_register_user(self):
-        response = self.client.post('/auth/register', json={
+        response = self.client.post('/api/auth/register', json={
             "username": "testuser",
             "password": "testpass"
         })
         self.assertEqual(response.status_code, 201)
 
     def test_login_user(self):
-        self.client.post('/auth/register', json={
+        self.client.post('/api/auth/register', json={
             "username": "testuser",
             "password": "testpass"
         })
-        response = self.client.post('/auth/login', json={
+        response = self.client.post('/api/auth/login', json={
             "username": "testuser",
             "password": "testpass"
         })
