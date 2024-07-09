@@ -1,0 +1,36 @@
+services:
+  backend:
+    build:
+      context: ./backend
+    environment:
+      - FLASK_ENV=development
+      - DATABASE_URL=mongodb://mongo:27017/shashank
+      - SECRET_KEY=pesto
+
+    depends_on:
+      - mongo
+
+  frontend:
+    build:
+      context: ./frontend
+    environment:
+      - NODE_ENV=development
+
+  mongo:
+    image: mongo:latest
+    volumes:
+      - mongo_data:/data/db
+
+  nginx:
+    image: nginx:latest
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - backend
+      - frontend
+    develop:
+
+volumes:
+  mongo_data:
