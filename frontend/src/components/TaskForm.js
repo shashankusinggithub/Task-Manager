@@ -10,7 +10,7 @@ const TaskForm = ({ handleSubmit }) => {
 
   const onSubmit = (e) => {
     e.preventDefault();
-    const due_date = dueDate && dueTime ? `${dueDate} ${dueTime}` : dueDate;
+    const due_date = dueDate && dueTime ? `${dueDate} ${dueTime}:00` : dueDate;
     handleSubmit({ title, description, status, due_date });
     setTitle("");
     setDescription("");
@@ -20,7 +20,10 @@ const TaskForm = ({ handleSubmit }) => {
   };
 
   return (
-    <Form onSubmit={onSubmit} className="mb-4">
+    <Form
+      onSubmit={onSubmit}
+      className="mb-4 text-white bg-primary border rounded border-4 border-dark p-3"
+    >
       <Form.Group controlId="formTitle">
         <Form.Label>Title</Form.Label>
         <Form.Control
@@ -73,7 +76,7 @@ const TaskForm = ({ handleSubmit }) => {
         />
       </Form.Group>
 
-      <Button variant="primary" type="submit">
+      <Button variant="primary" type="submit" className="btn btn-outline-dark">
         Add Task
       </Button>
     </Form>

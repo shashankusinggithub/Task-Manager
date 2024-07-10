@@ -32,7 +32,7 @@ def add_task(task):
     if 'due_date' in task and isinstance(task['due_date'], str):
         try:
             task['due_date'] = datetime.strptime(
-                task['due_date'], '%Y-%m-%dT%H:%M')
+                task['due_date'], '%Y-%m-%dT%H:%M:%S')
         except ValueError:
             task['due_date'] = datetime.combine(datetime.strptime(
                 task['due_date'], '%Y-%m-%d').date(), datetime.min.time())
@@ -110,6 +110,6 @@ class TaskForm(FlaskForm):
                                 DataRequired(), Length(min=1, max=500)])
     status = SelectField('Status', choices=[('To Do', 'To Do'), (
         'In Progress', 'In Progress'), ('Done', 'Done')], validators=[DataRequired()])
-    due_date = DateTimeField('Due Date', format='%Y-%m-%d %H:%M',
+    due_date = DateTimeField('Due Date', format='%Y-%m-%d %H:%M:%S',
                              validators=[InputRequired()])
     avatar = FileField('Avatar')

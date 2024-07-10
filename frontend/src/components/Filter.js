@@ -18,7 +18,10 @@ const Filter = ({
   };
 
   return (
-    <Form className="mb-4" onSubmit={handleSubmit}>
+    <Form
+      className="mb-4 bg-secondary border-dark rounded text-white p-3 border border-5"
+      onSubmit={handleSubmit}
+    >
       <Row>
         <Col md={3}>
           <Form.Group controlId="formFilter">
@@ -71,7 +74,7 @@ const Filter = ({
               onChange={(e) => setSearchQuery(e.target.value)}
             />
           </Form.Group>
-          <Button variant="primary" type="submit" className="mt-2">
+          <Button variant="primary" type="submit" className="mt-2 ">
             Search
           </Button>
         </Col>

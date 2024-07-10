@@ -37,7 +37,7 @@ class TaskTestCase(unittest.TestCase):
             'title': 'Test Task',
             'description': 'This is a test task',
             'status': 'To Do',
-            'due_date': '2024-08-01 05:35'
+            'due_date': '2024-08-01 05:35:00'
         }, headers=self.headers)
         self.assertEqual(response.status_code, 201)
         task_id = clean_string(response.data.decode())
@@ -67,7 +67,7 @@ class TaskTestCase(unittest.TestCase):
             "title": "New Task",
             "description": "Task Description",
             "status": "To Do",
-            'due_date': '2024-08-01 05:35'
+            'due_date': '2024-08-01 05:35:00'
         }, headers=self.headers)
 
         response = self.client.get('/api/tasks', headers=self.headers)
@@ -79,7 +79,7 @@ class TaskTestCase(unittest.TestCase):
             "title": "New Task",
             "description": "Task Description",
             "status": "To Do",
-            'due_date': '2024-08-01 05:35'
+            'due_date': '2024-08-01 05:35:00'
         }, headers=self.headers)
         task_id = clean_string(response.data.decode())
         self.assertTrue(ObjectId.is_valid(ObjectId(str(task_id))))
@@ -97,7 +97,7 @@ class TaskTestCase(unittest.TestCase):
             "title": "New Task",
             "description": "Task Description",
             "status": "To Do",
-            'due_date': '2024-08-01 05:35'
+            'due_date': '2024-08-01 05:35:00'
         }, headers=self.headers)
 
         task_id = clean_string(response.data.decode())
@@ -108,7 +108,7 @@ class TaskTestCase(unittest.TestCase):
             "title": "Updated Task",
             "description": "Updated Description",
             "status": "In Progress",
-            'due_date': '2024-08-01 05:35'
+            'due_date': '2024-08-01 05:35:00'
         }, headers=self.headers)
         self.assertEqual(response.status_code, 204)
 
@@ -126,7 +126,7 @@ class TaskTestCase(unittest.TestCase):
             "title": "New Task",
             "description": "Task Description",
             "status": "To Do",
-            'due_date': '2024-08-01 05:35'
+            'due_date': '2024-08-01 05:35:00'
         }, headers=self.headers)
         print(response.data)
         task_id = clean_string(response.data.decode())
@@ -146,13 +146,13 @@ class TaskTestCase(unittest.TestCase):
             "title": "First Task",
             "description": "First Description",
             "status": "To Do",
-            'due_date': '2024-08-01 05:35'
+            'due_date': '2024-08-01 05:35:00'
         }, headers=self.headers)
         self.client.post('/api/tasks', json={
             "title": "Second Task",
             "description": "Second Description",
             "status": "In Progress",
-            'due_date': '2024-08-01 05:35'
+            'due_date': '2024-08-01 05:35:00'
         }, headers=self.headers)
 
         # Search tasks
