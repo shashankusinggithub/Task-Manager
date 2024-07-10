@@ -1,35 +1,47 @@
 import React from "react";
-import { Navbar, Nav, Button } from "react-bootstrap";
+import { Navbar, Nav, NavDropdown } from "react-bootstrap";
 import { Link, useNavigate } from "react-router-dom";
 
-const NavigationBar = () => {
+const NavigationBar = ({ user, handleLogout }) => {
   const navigate = useNavigate();
-  const token = localStorage.getItem("token");
 
-  const handleLogout = () => {
-    localStorage.removeItem("token");
+  const logout = () => {
+    handleLogout();
     navigate("/login");
   };
 
   return (
     <Navbar bg="dark" variant="dark" expand="lg">
-      <Navbar.Brand as={Link} to="/" className="px-3">
+      <Navbar.Brand as={Link} to="/">
         Task Manager
       </Navbar.Brand>
       <Navbar.Toggle aria-controls="basic-navbar-nav" />
-      <Navbar.Collapse id="basic-navbar-nav" className="justify-content-end">
-        <Nav className=" px-3">
-          {token ? (
-            <Nav.Link onClick={handleLogout} className=" align-items-center">
-              Logout
-            </Nav.Link>
+      <Navbar.Collapse id="basic-navbar-nav">
+        <Nav className="ml-auto">
+          {user ? (
+            <NavDropdown
+              title={
+                <img
+                  src={`data:image/jpeg;base64,${user.avatar}`}
+                  alt="avatar"
+                  style={{ width: "30px", height: "30px", borderRadius: "50%" }}
+                />
+              }
+              id="basic-nav-dropdown"
+            >
+              <NavDropdown.Item as={Link} to="/profile">
+                Profile
+              </NavDropdown.Item>
+              <NavDropdown.Divider />
+              <NavDropdown.Item onClick={logout}>Logout</NavDropdown.Item>
+            </NavDropdown>
           ) : (
             <>
-              <Nav.Link as={Link} to="/login" className=" align-items-center">
-                <Button variant="outline-light">Login</Button>
+              <Nav.Link as={Link} to="/login">
+                Login
               </Nav.Link>
               <Nav.Link as={Link} to="/register">
-                <Button variant="outline-light">Register</Button>
+                Register
               </Nav.Link>
             </>
           )}

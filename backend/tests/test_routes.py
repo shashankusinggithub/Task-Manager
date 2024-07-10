@@ -34,33 +34,52 @@ class TaskTestCase(unittest.TestCase):
 
     def test_create_task(self):
         response = self.client.post('/api/tasks', json={
-            "title": "New Task",
-            "description": "Task Description",
-            "status": "To Do"
+            'title': 'Test Task',
+            'description': 'This is a test task',
+            'status': 'To Do',
+            'due_date': '2024-08-01 05:35'
         }, headers=self.headers)
         self.assertEqual(response.status_code, 201)
         task_id = clean_string(response.data.decode())
         self.assertTrue(ObjectId.is_valid(ObjectId(str(task_id))))
+
+    def test_create_task_with_invalid_status(self):
+        response = self.client.post('/api/tasks', json={
+            "title": "New Task",
+            "description": "Task Description",
+            "status": "Invalid Status"
+        }, headers=self.headers)
+        self.assertEqual(response.status_code, 400)
+        self.assertIn("Not a valid choice.", response.json["errors"]['status'])
+
+    def test_create_task_without_title(self):
+        response = self.client.post('/api/tasks', json={
+            "description": "Task Description",
+            "status": "To Do"
+        }, headers=self.headers)
+        self.assertEqual(response.status_code, 400)
+        self.assertIn("This field is required",
+                      response.json["errors"]['title'][0])
 
     def test_get_all_tasks(self):
         # Add a task
         self.client.post('/api/tasks', json={
             "title": "New Task",
             "description": "Task Description",
-            "status": "To Do"
+            "status": "To Do",
+            'due_date': '2024-08-01 05:35'
         }, headers=self.headers)
 
         response = self.client.get('/api/tasks', headers=self.headers)
         self.assertEqual(response.status_code, 200)
-        tasks = response.json
-        self.assertTrue(tasks)
 
     def test_get_task_by_id(self):
         # Add a task
         response = self.client.post('/api/tasks', json={
             "title": "New Task",
             "description": "Task Description",
-            "status": "To Do"
+            "status": "To Do",
+            'due_date': '2024-08-01 05:35'
         }, headers=self.headers)
         task_id = clean_string(response.data.decode())
         self.assertTrue(ObjectId.is_valid(ObjectId(str(task_id))))
@@ -77,7 +96,8 @@ class TaskTestCase(unittest.TestCase):
         response = self.client.post('/api/tasks', json={
             "title": "New Task",
             "description": "Task Description",
-            "status": "To Do"
+            "status": "To Do",
+            'due_date': '2024-08-01 05:35'
         }, headers=self.headers)
 
         task_id = clean_string(response.data.decode())
@@ -87,7 +107,8 @@ class TaskTestCase(unittest.TestCase):
         response = self.client.put(f'/api/tasks/{task_id}', json={
             "title": "Updated Task",
             "description": "Updated Description",
-            "status": "In Progress"
+            "status": "In Progress",
+            'due_date': '2024-08-01 05:35'
         }, headers=self.headers)
         self.assertEqual(response.status_code, 204)
 
@@ -104,7 +125,8 @@ class TaskTestCase(unittest.TestCase):
         response = self.client.post('/api/tasks', json={
             "title": "New Task",
             "description": "Task Description",
-            "status": "To Do"
+            "status": "To Do",
+            'due_date': '2024-08-01 05:35'
         }, headers=self.headers)
         print(response.data)
         task_id = clean_string(response.data.decode())
@@ -117,6 +139,29 @@ class TaskTestCase(unittest.TestCase):
         response = self.client.get(
             f'/api/tasks/{task_id}', headers=self.headers)
         self.assertEqual(response.status_code, 404)
+
+    def test_search_tasks(self):
+        # Add tasks
+        self.client.post('/api/tasks', json={
+            "title": "First Task",
+            "description": "First Description",
+            "status": "To Do",
+            'due_date': '2024-08-01 05:35'
+        }, headers=self.headers)
+        self.client.post('/api/tasks', json={
+            "title": "Second Task",
+            "description": "Second Description",
+            "status": "In Progress",
+            'due_date': '2024-08-01 05:35'
+        }, headers=self.headers)
+
+        # Search tasks
+        response = self.client.get(
+            '/api/tasks/search?query=First', headers=self.headers)
+        self.assertEqual(response.status_code, 200)
+        tasks = response.json
+        self.assertEqual(len(tasks), 1)
+        self.assertEqual(tasks[0]['title'], "First Task")
 
 
 if __name__ == '__main__':

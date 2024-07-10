@@ -2,32 +2,43 @@ import React, { useState, useEffect } from "react";
 import { Container, Row, Col, Alert } from "react-bootstrap";
 import TaskForm from "../components/TaskForm";
 import TaskList from "../components/TaskList";
-import Filter from "../components/Filter";
-import { getTasks, createTask, updateTask, deleteTask } from "../services/api";
-import { useNavigate } from "react-router-dom";
+import FilterBox from "../components/Filter";
+import {
+  getTasks,
+  createTask,
+  updateTask,
+  deleteTask,
+  searchTasks,
+} from "../services/api";
+import { json, useNavigate } from "react-router-dom";
 
 const HomePage = () => {
   const [tasks, setTasks] = useState([]);
   const [filter, setFilter] = useState("All");
   const [token, setToken] = useState(localStorage.getItem("token"));
   const [error, setError] = useState(null);
+  const [sortBy, setSortBy] = useState("title");
+  const [order, setOrder] = useState("asc");
+  const [searchQuery, setSearchQuery] = useState("");
   const navigate = useNavigate();
-
   useEffect(() => {
     const fetchTasks = async () => {
       if (token) {
         try {
-          const response = await getTasks(token);
-          setTasks(response.data);
+          const response = await getTasks(token, sortBy, order);
+          let data = response.data;
+          setTasks(data);
         } catch (error) {
           setError("Failed to fetch tasks.");
+          if (error.response.data.msg === "Token has expired") {
+            localStorage.clear();
+            navigate("/login");
+          }
         }
-      } else {
-        navigate("/login");
       }
     };
     fetchTasks();
-  }, [token]);
+  }, [token, sortBy, order]);
 
   function getErrorMessages(errors) {
     let errorMessages = [];
@@ -38,7 +49,7 @@ const HomePage = () => {
         });
       }
     }
-    return errorMessages.join(" ");
+    return errorMessages.join("\n");
   }
   const handleCreateTask = async (task) => {
     if (token) {
@@ -55,6 +66,7 @@ const HomePage = () => {
   const handleUpdateTask = async (taskId, updatedTask) => {
     if (token) {
       try {
+        console.log(updatedTask);
         await updateTask(taskId, updatedTask, token);
         setTasks(
           tasks.map((task) => (task._id === taskId ? updatedTask : task))
@@ -78,6 +90,18 @@ const HomePage = () => {
     }
   };
 
+  const handleSearch = async (query) => {
+    if (token) {
+      try {
+        const response = await searchTasks(token, query);
+        setTasks(response.data);
+        setError(null);
+      } catch (error) {
+        setError("Failed to search tasks.");
+      }
+    }
+  };
+
   const filteredTasks = tasks.filter(
     (task) => filter === "All" || task.status === filter
   );
@@ -85,23 +109,27 @@ const HomePage = () => {
   return (
     <Container>
       {error && <Alert variant="danger">{error}</Alert>}
-      <Row>
-        <Col>
-          <TaskForm handleSubmit={handleCreateTask} />
-        </Col>
-      </Row>
-      <Row>
-        <Col>
-          <Filter filter={filter} setFilter={setFilter} />
-        </Col>
-      </Row>
-      <Row>
-        <Col>
+      <Row className="mt-4">
+        <Col md={8}>
+          <FilterBox
+            filter={filter}
+            setFilter={setFilter}
+            sortBy={sortBy}
+            setSortBy={setSortBy}
+            order={order}
+            setOrder={setOrder}
+            searchQuery={searchQuery}
+            setSearchQuery={setSearchQuery}
+            handleSearch={handleSearch}
+          />
           <TaskList
             tasks={filteredTasks}
             handleDelete={handleDeleteTask}
             handleUpdate={handleUpdateTask}
           />
+        </Col>
+        <Col md={4}>
+          <TaskForm handleSubmit={handleCreateTask} />
         </Col>
       </Row>
     </Container>

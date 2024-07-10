@@ -20,6 +20,7 @@ const LoginPage = () => {
       const response = await login(username, password);
       localStorage.setItem("token", response.data.access_token);
       navigate("/");
+      window.location.reload();
     } catch (error) {
       setError("Login failed. Please check your username and password.");
       console.error("Login failed", error);
