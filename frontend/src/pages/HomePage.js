@@ -21,6 +21,7 @@ const HomePage = () => {
   const [order, setOrder] = useState("asc");
   const [searchQuery, setSearchQuery] = useState("");
   const navigate = useNavigate();
+
   useEffect(() => {
     const fetchTasks = async () => {
       if (token) {
@@ -51,6 +52,7 @@ const HomePage = () => {
     }
     return errorMessages.join("\n");
   }
+
   const handleCreateTask = async (task) => {
     if (token) {
       try {
@@ -66,7 +68,6 @@ const HomePage = () => {
   const handleUpdateTask = async (taskId, updatedTask) => {
     if (token) {
       try {
-        console.log(updatedTask);
         await updateTask(taskId, updatedTask, token);
         setTasks(
           tasks.map((task) => (task._id === taskId ? updatedTask : task))
@@ -90,10 +91,15 @@ const HomePage = () => {
     }
   };
 
-  const handleSearch = async (query) => {
+  const handleSearch = async ({ filter, sortBy, order, searchQuery }) => {
     if (token) {
       try {
-        const response = await searchTasks(token, query);
+        const response = await searchTasks(token, {
+          filter,
+          sortBy,
+          order,
+          searchQuery,
+        });
         setTasks(response.data);
         setError(null);
       } catch (error) {

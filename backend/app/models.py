@@ -58,23 +58,25 @@ def delete_task(task_id, user_id):
     return tasks.delete_one({"_id": ObjectId(task_id), "user_id": user_id})
 
 
-def get_all_tasks(user_id, sort_by='title', order='asc'):
+def get_all_tasks(user_id, sort_by='title', order='asc', filter='All', query=''):
     tasks = get_tasks_collection()
     sort_order = 1 if order == 'asc' else -1
-    data = tasks.find({"user_id": user_id}).sort(sort_by, sort_order)
+    filter_query = {} if filter == 'All' else {'status': filter}
+    search_query = {
+        "$or": [
+            {"title": {"$regex": query, "$options": "i"}},
+            {"description": {"$regex": query, "$options": "i"}}
+        ]
+    } if query else {}
+    combined_query = {**filter_query, **search_query, "user_id": user_id}
+    data = tasks.find(combined_query).sort(sort_by, sort_order)
     data = [{**res, '_id': str(res['_id']),
              'user_id': str(res['user_id']), 'due_date': str(res['due_date'])} for res in data]
     return data
 
 
-def search_tasks(user_id, query):
-    tasks = get_tasks_collection()
-    regex = re.compile(f'.*{query}.*', re.IGNORECASE)
-    data = tasks.find({"user_id": user_id, "$or": [
-                      {"title": regex}, {"description": regex}]})
-    data = [{**res, '_id': str(res['_id']),
-             'user_id': str(res['user_id']), 'due_date': str(res['due_date'])} for res in data]
-    return data
+def search_tasks(user_id, filter, sort_by, order, query):
+    return get_all_tasks(user_id, sort_by, order, filter, query)
 
 
 def get_user_by_username(username):

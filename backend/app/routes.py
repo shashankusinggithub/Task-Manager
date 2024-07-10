@@ -42,8 +42,13 @@ class TaskList(Resource):
     @jwt_required()
     def get(self):
         user_id = get_jwt_identity()
-        tasks = get_all_tasks(user_id)
-        return tasks, 200
+        sort_by = request.args.get('sort_by', 'title')
+        order = request.args.get('order', 'asc')
+        filter = request.args.get('filter', 'All')
+        query = request.args.get('query', '')
+
+        tasks = get_all_tasks(user_id, sort_by, order, filter, query)
+        return list(tasks), 200
 
     @ jwt_required()
     def post(self):
@@ -88,12 +93,16 @@ class Profile(Resource):
 
 
 class TaskSearch(Resource):
-    @ jwt_required()
+    @jwt_required()
     def get(self):
         user_id = get_jwt_identity()
+        filter = request.args.get('filter', 'All')
+        sort_by = request.args.get('sort_by', 'title')
+        order = request.args.get('order', 'asc')
         query = request.args.get('query', '')
-        tasks = search_tasks(user_id, query)
-        return tasks, 200
+
+        tasks = search_tasks(user_id, filter, sort_by, order, query)
+        return list(tasks), 200
 
 
 def initialize_routes(api):

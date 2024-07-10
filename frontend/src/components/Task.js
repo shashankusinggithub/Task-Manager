@@ -22,7 +22,7 @@ const Task = ({ task, handleDelete, handleUpdate }) => {
 
   const handleDueDateChange = (e) => {
     setDueDate(e.target.value);
-    const updatedDate = `${e.target.value} ${dueTime}`;
+    const updatedDate = `${e.target.value} ${dueTime}:00`;
     handleUpdate(task._id, { ...task, due_date: updatedDate });
   };
 

@@ -14,7 +14,7 @@ const Filter = ({
 }) => {
   const handleSubmit = (e) => {
     e.preventDefault();
-    handleSearch(searchQuery);
+    handleSearch({ filter, sortBy, order, searchQuery });
   };
 
   return (
